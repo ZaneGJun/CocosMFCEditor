@@ -7,6 +7,8 @@
 
 #include "MyUtils.h"
 
+#include <map>
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -14,6 +16,8 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+static std::map<std::string, bool> _fileExtension;
+
 static void loopFilePath(const WCHAR* lpPath, HTREEITEM parent, CViewTree* tree)
 {
 	WCHAR szFile[MAX_PATH] = { 0 };
