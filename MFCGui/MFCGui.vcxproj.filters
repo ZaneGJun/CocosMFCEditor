@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="MFCClasses">
+      <UniqueIdentifier>{f45fab9c-4612-44f4-8a2d-8320d4e6ee1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes">
+      <UniqueIdentifier>{c25ec5c1-2655-4e8d-ba0c-0e8a6d610087}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\MFCFramework">
+      <UniqueIdentifier>{20e16615-ea40-40d8-98c7-92f066fdf486}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MFCClasses\ChildFrm.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\ClassView.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\FileView.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\MainFrm.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\MFCGui.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\MFCGuiDoc.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\MFCGuiView.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\OutputWnd.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\PropertiesWnd.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\Resource.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\stdafx.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\targetver.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClasses\ViewTree.h">
+      <Filter>MFCClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MyUtils.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MFCFamework\MFCAppDelegate.h">
+      <Filter>Classes\MFCFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MFCFamework\MFCGLView.h">
+      <Filter>Classes\MFCFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MFCFamework\MFCHelper.h">
+      <Filter>Classes\MFCFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GlobalDefines.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MainScene.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MFCClasses\ChildFrm.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\ClassView.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\FileView.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\MainFrm.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\MFCGui.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\MFCGuiDoc.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\MFCGuiView.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\OutputWnd.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\PropertiesWnd.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\stdafx.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCClasses\ViewTree.cpp">
+      <Filter>MFCClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MyUtils.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MFCFamework\MFCAppDelegate.cpp">
+      <Filter>Classes\MFCFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MFCFamework\MFCGLView.cpp">
+      <Filter>Classes\MFCFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MFCFamework\MFCHelper.cpp">
+      <Filter>Classes\MFCFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MainScene.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MFCGui.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\file_view.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\file_view_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\class_view.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\class_view_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\fileview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\fileview_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\classview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\classview_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\explorer.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\explorer_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\sort.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\sort_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menuimages.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menuimages_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\output_wnd.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\output_wnd_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_wnd.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_wnd_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="UserImages.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\MFCGuiDoc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\MFCGui.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar256.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\MFCGui.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+</Project>
