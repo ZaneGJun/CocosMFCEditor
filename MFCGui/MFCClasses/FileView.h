@@ -50,6 +50,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 
+	
 	DECLARE_MESSAGE_MAP()
 };
 

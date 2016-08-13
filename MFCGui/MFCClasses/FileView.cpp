@@ -8,6 +8,7 @@
 #include "MyUtils.h"
 
 #include <map>
+#include <vector>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -17,6 +18,7 @@ static char THIS_FILE[]=__FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 static std::map<std::string, bool> _fileExtension;
+static std::vector<CString*> _fullPathData;
 
 static void loopFilePath(const WCHAR* lpPath, HTREEITEM parent, CViewTree* tree)
 {
@@ -51,8 +53,11 @@ static void loopFilePath(const WCHAR* lpPath, HTREEITEM parent, CViewTree* tree)
 			StrCpy(root, lpPath);
 			StrCat(root, FindFileData.cFileName);
 
+			CString *fullPath = new CString(root);
+			_fullPathData.push_back(fullPath);
 			//文件
-			tree->InsertItem(FindFileData.cFileName, 2, 2, parent);
+			HTREEITEM fileItem = tree->InsertItem(FindFileData.cFileName, 2, 2, parent);
+			tree->SetItemData(fileItem, (DWORD)fullPath);
 		}
 
 		if (!FindNextFile(hFind, &FindFileData)) break;
@@ -70,6 +75,14 @@ CFileView::CFileView()
 
 CFileView::~CFileView()
 {
+	for (CString* ptr : _fullPathData)
+	{
+		if (ptr)
+		{
+			delete ptr;
+			ptr = nullptr;
+		}
+	}
 }
 
 BEGIN_MESSAGE_MAP(CFileView, CDockablePane)

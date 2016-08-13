@@ -1,6 +1,10 @@
 
 #include "stdafx.h"
 #include "ViewTree.h"
+#include <string>
+
+#include "GlobalDefines.h"
+#include "MFCFamework/MFCHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,6 +24,7 @@ CViewTree::~CViewTree()
 }
 
 BEGIN_MESSAGE_MAP(CViewTree, CTreeCtrl)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDClick)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -38,4 +43,18 @@ BOOL CViewTree::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 	}
 
 	return bRes;
+}
+
+void CViewTree::OnDClick(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	HTREEITEM item = GetSelectedItem();
+	CString* fullPathCStringPtr = (CString*)(GetItemData(item));
+
+	std::wstring fullString(fullPathCStringPtr->GetBuffer());
+
+	MFCHelper::dispatchCocosCustomEvent(EVENT_MFC_FILE_TREEVIEW_DOUBLE_CLICK_ITEM, (void*)&fullString);
 }

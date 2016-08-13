@@ -19,5 +19,6 @@ public:
 	virtual ~CViewTree();
 
 protected:
+	afx_msg void OnDClick(NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 };
