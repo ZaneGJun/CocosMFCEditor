@@ -42,3 +42,6 @@ cocos2d/cocos/2d/Debug.win32/libcocos2d.log
 *.suo
 *.suo
 proj.win32/.vs/CocosMFCEditor/v14/.suo
+*.suo
+*.suo
+*.suo

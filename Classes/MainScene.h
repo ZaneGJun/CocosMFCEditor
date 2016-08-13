@@ -8,6 +8,7 @@ class MainScene : public cocos2d::Layer
 {
 public:
     static cocos2d::Scene* createScene();
+	static MainScene* create();
 
     virtual bool init();
     

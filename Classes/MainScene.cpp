@@ -1,6 +1,6 @@
 #include "MainScene.h"
 #include "GlobalDefines.h"
-
+#include "MyUtils.h"
 USING_NS_CC;
 
 Scene* MainScene::createScene()
@@ -17,6 +17,22 @@ Scene* MainScene::createScene()
     // return the scene
     return scene;
 }
+
+
+MainScene* MainScene::create()
+{
+	auto ret = new (std::nothrow) MainScene();
+	if (ret && ret->init())
+	{
+		ret->autorelease();
+		return ret;
+	}
+
+	CC_SAFE_DELETE(ret);
+	ret = nullptr;
+	return nullptr;
+}
+
 
 // on "init" you need to initialize your instance
 bool MainScene::init()
@@ -90,8 +106,11 @@ void MainScene::addListener()
 
 void MainScene::onMFCFileTreeViewDClickItem(EventCustom* event)
 {
-	char* s = static_cast<char*>(event->getUserData());
-	std::string filename(s);
+	std::wstring* s = static_cast<std::wstring*>(event->getUserData());
+
+	char fullpath[MAX_PATH] = { 0 };
+	MyUtils::wcharTochar(s->c_str(), fullpath, sizeof(fullpath));
+	std::string filename(fullpath);
 
 	std::string fileExtension;
 	size_t pos = filename.find_last_of('.');
@@ -101,8 +120,6 @@ void MainScene::onMFCFileTreeViewDClickItem(EventCustom* event)
 
 		std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
 	}
-	
-	auto size = Director::getInstance()->getWinSize();
 
 	//清理上一次残留
 	clearAllAddItem();
@@ -112,7 +129,6 @@ void MainScene::onMFCFileTreeViewDClickItem(EventCustom* event)
 		auto addNode = getChildByName("PngAddNode");
 		if (addNode)
 		{
-
 			auto pic = Sprite::create(filename);
 			pic->setAnchorPoint(Vec2(0.5f, 0.5f));
 			addNode->addChild(pic);
@@ -123,7 +139,6 @@ void MainScene::onMFCFileTreeViewDClickItem(EventCustom* event)
 		auto addNode = getChildByName("ModelAddNode");
 		if (addNode)
 		{
-
 			auto model = Sprite3D::create(filename);
 			model->setAnchorPoint(Vec2(0.5f, 0.5f));
 			addNode->addChild(model);
