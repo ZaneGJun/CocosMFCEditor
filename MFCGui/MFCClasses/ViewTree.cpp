@@ -3,6 +3,7 @@
 #include "ViewTree.h"
 #include <string>
 
+#include "MainFrm.h"
 #include "GlobalDefines.h"
 #include "MFCFamework/MFCHelper.h"
 
@@ -50,6 +51,8 @@ void CViewTree::OnDClick(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
+
+	((CMainFrame*)AfxGetMainWnd())->resetProperty();
 
 	HTREEITEM item = GetSelectedItem();
 	CString* fullPathCStringPtr = (CString*)(GetItemData(item));

@@ -19,6 +19,26 @@ namespace MyUtils
 			chr, size, NULL, NULL);
 	}
 
+	std::string w2s(const std::wstring& wStr)
+	{
+		CHAR tmp[MAX_PATH] = { 0 };
+
+		wcharTochar(wStr.c_str(), tmp, sizeof(tmp));
+		std::string ret(tmp);
+
+		return ret;
+	}
+
+	std::wstring s2w(const std::string& sourc)
+	{
+		WCHAR tmp[MAX_PATH] = {0};
+
+		charTowchar(sourc.c_str(), tmp, sizeof(tmp));
+
+		std::wstring ret(tmp);
+		return ret;
+	}
+
 	// D:\aaa\bbb\ccc\ddd\abc.txt --> D:/aaa/bbb/ccc/ddd/abc.txt
 	std::string convertPathFormatToUnixStyle(const std::string& path)
 	{

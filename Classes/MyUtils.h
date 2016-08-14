@@ -9,6 +9,9 @@ namespace MyUtils
 
 	void wcharTochar(const wchar_t *wchar, char *chr, int size);
 
+	std::string w2s(const std::wstring& wStr);
+	std::wstring s2w(const std::string& sourc);
+
 	// D:\aaa\bbb\ccc\ddd\abc.txt --> D:/aaa/bbb/ccc/ddd/abc.txt
 	std::string convertPathFormatToUnixStyle(const std::string& path);
 

@@ -78,6 +78,9 @@ void MainScene::addListener()
 {
 	auto dispatcher = Director::getInstance()->getEventDispatcher();
 	dispatcher->addCustomEventListener(EVENT_MFC_FILE_TREEVIEW_DOUBLE_CLICK_ITEM, std::bind(&MainScene::onMFCFileTreeViewDClickItem,this, std::placeholders::_1));
+	dispatcher->addCustomEventListener(EVENT_MFC_PROPERTY_UPDATE_BASE, std::bind(&MainScene::onMFCPropertyBaseChange, this, std::placeholders::_1));
+	dispatcher->addCustomEventListener(EVENT_MFC_PROPERTY_UPDATE_MODEL_ANIMATE, std::bind(&MainScene::onMFCPropertyModelAnimateChange, this, std::placeholders::_1));
+	dispatcher->addCustomEventListener(EVENT_MFC_PROPERTY_UPDATE_MODLE_MATERIAL, std::bind(&MainScene::onMFCPropertyModelMaterialChange, this, std::placeholders::_1));
 }
 
 void MainScene::onMFCFileTreeViewDClickItem(EventCustom* event)
@@ -141,5 +144,73 @@ void MainScene::clearAllAddItem()
 		{
 			addNode->removeAllChildrenWithCleanup(true);
 		};
+	}
+}
+
+void MainScene::onMFCPropertyBaseChange(EventCustom* event)
+{
+	BasePropert* baseData = static_cast<BasePropert*>(event->getUserData());
+
+	for (std::string name : _addChileNodeTypeList)
+	{
+		auto addNode = getChildByName(name);
+		if (addNode)
+		{
+			auto childs = addNode->getChildren();
+			for (Node* child : childs)
+			{
+				child->setPosition3D(Vec3(baseData->posX, baseData->posY, baseData->posZ));
+				child->setRotation3D(Vec3(baseData->rotX, baseData->rotY, baseData->rotZ));
+				child->setScaleX(baseData->scaleX);
+				child->setScaleY(baseData->scaleY);
+				child->setScaleZ(baseData->scaleZ);
+			}
+		};
+	}
+}
+
+void MainScene::onMFCPropertyModelAnimateChange(EventCustom* event)
+{
+	ModelAnimate* baseData = static_cast<ModelAnimate*>(event->getUserData());
+
+	auto addNode = getChildByName("ModelAddNode");
+	if (addNode)
+	{
+		auto childs = addNode->getChildren();
+		float realRate = 1.0f / baseData->rate;
+		float realStart = baseData->startframe * realRate;
+		float realEnd = baseData->endframe * realRate;
+
+		for (Node* child : childs)
+		{
+			auto animation = Animation3D::create(baseData->path);
+			if (animation)
+			{
+				child->stopAllActions();
+				auto animate = Animate3D::create(animation, realStart, realEnd - realStart);
+				child->runAction(CCRepeatForever::create(animate));
+			}
+		}
+	}
+}
+
+void MainScene::onMFCPropertyModelMaterialChange(EventCustom* event)
+{
+	ModelMaterial* baseData = static_cast<ModelMaterial*>(event->getUserData());
+
+	auto addNode = getChildByName("ModelAddNode");
+	if (addNode)
+	{
+		auto childs = addNode->getChildren();
+		for (Node* child : childs)
+		{
+			auto material = Sprite3DMaterial::createWithFilename(baseData->path);
+			Sprite3D* model = static_cast<Sprite3D*>(child);
+			if (model&&material)
+			{
+				material->setTechnique(baseData->technique);
+				model->setMaterial(material);
+			}
+		}
 	}
 }

@@ -5,6 +5,8 @@
 #include "Resource.h"
 #include "MainFrm.h"
 #include "MFCGui.h"
+#include "MFCFamework/MFCHelper.h"
+#include "MyUtils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -24,6 +26,30 @@ CPropertiesWnd::~CPropertiesWnd()
 {
 }
 
+void CPropertiesWnd::reset()
+{
+	m_basePropertInfo.posX = 0.0f;
+	m_basePropertInfo.posY = 0.0f;
+	m_basePropertInfo.posZ = 0.0f;
+	m_basePropertInfo.rotX = 0.0f;
+	m_basePropertInfo.rotY = 0.0f;
+	m_basePropertInfo.rotZ = 0.0f;
+	m_basePropertInfo.scaleX = 1.0f;
+	m_basePropertInfo.scaleY = 1.0f;
+	m_basePropertInfo.scaleZ = 1.0f;
+
+	m_modelAnimateInfo.path = "";
+	m_modelAnimateInfo.rate = 24;
+	m_modelAnimateInfo.startframe = 0;
+	m_modelAnimateInfo.endframe = 1;
+
+	m_modelMaterialInfo.path = "";
+	m_modelMaterialInfo.technique = "";
+
+	m_wndPropList.RemoveAll();
+	InitPropList();
+}
+
 BEGIN_MESSAGE_MAP(CPropertiesWnd, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
@@ -37,6 +63,8 @@ BEGIN_MESSAGE_MAP(CPropertiesWnd, CDockablePane)
 	ON_UPDATE_COMMAND_UI(ID_PROPERTIES2, OnUpdateProperties2)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
+
+	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,10 +80,7 @@ void CPropertiesWnd::AdjustLayout()
 	CRect rectClient;
 	GetClientRect(rectClient);
 
-	int cyTlb = m_wndToolBar.CalcFixedLayout(FALSE, TRUE).cy;
-
-	m_wndObjectCombo.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), m_nComboHeight, SWP_NOACTIVATE | SWP_NOZORDER);
-	m_wndToolBar.SetWindowPos(NULL, rectClient.left, rectClient.top + m_nComboHeight, rectClient.Width(), cyTlb, SWP_NOACTIVATE | SWP_NOZORDER);
+	int cyTlb = 0;
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + m_nComboHeight + cyTlb, rectClient.Width(), rectClient.Height() -(m_nComboHeight+cyTlb), SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
@@ -67,24 +92,6 @@ int CPropertiesWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CRect rectDummy;
 	rectDummy.SetRectEmpty();
 
-	// 创建组合: 
-	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_BORDER | CBS_SORT | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-
-	if (!m_wndObjectCombo.Create(dwViewStyle, rectDummy, this, 1))
-	{
-		TRACE0("未能创建属性组合 \n");
-		return -1;      // 未能创建
-	}
-
-	m_wndObjectCombo.AddString(_T("应用程序"));
-	m_wndObjectCombo.AddString(_T("属性窗口"));
-	m_wndObjectCombo.SetCurSel(0);
-
-	CRect rectCombo;
-	m_wndObjectCombo.GetClientRect (&rectCombo);
-
-	m_nComboHeight = rectCombo.Height();
-
 	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
 	{
 		TRACE0("未能创建属性网格\n");
@@ -92,18 +99,6 @@ int CPropertiesWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	InitPropList();
-
-	m_wndToolBar.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, IDR_PROPERTIES);
-	m_wndToolBar.LoadToolBar(IDR_PROPERTIES, 0, 0, TRUE /* 已锁定*/);
-	m_wndToolBar.CleanUpLockedImages();
-	m_wndToolBar.LoadBitmap(theApp.m_bHiColorIcons ? IDB_PROPERTIES_HC : IDR_PROPERTIES, 0, 0, TRUE /* 锁定*/);
-
-	m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() | CBRS_TOOLTIPS | CBRS_FLYBY);
-	m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() & ~(CBRS_GRIPPER | CBRS_SIZE_DYNAMIC | CBRS_BORDER_TOP | CBRS_BORDER_BOTTOM | CBRS_BORDER_LEFT | CBRS_BORDER_RIGHT));
-	m_wndToolBar.SetOwner(this);
-
-	// 所有命令将通过此控件路由，而不是通过主框架路由: 
-	m_wndToolBar.SetRouteCommandsViaFrame(FALSE);
 
 	AdjustLayout();
 	return 0;
@@ -158,83 +153,49 @@ void CPropertiesWnd::InitPropList()
 {
 	SetPropListFont();
 
-	m_wndPropList.EnableHeaderCtrl(FALSE);
+	m_wndPropList.EnableHeaderCtrl(TRUE);
 	m_wndPropList.EnableDescriptionArea();
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pGroup1 = new CMFCPropertyGridProperty(_T("外观"));
+	CMFCPropertyGridProperty* pProt= nullptr;
+	std::string resourcePath = MyUtils::getCheckPath();
+	std::wstring resourcePathW = MyUtils::s2w(resourcePath);
+	
+	//基础
+	CMFCPropertyGridProperty* pBase = new CMFCPropertyGridProperty(_T("基础"));
+	pProt = new CMFCPropertyGridProperty(_T("位置"), NULL, NULL);
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("posX"), (float)m_basePropertInfo.posX, _T("positon.x"), MFC_PROPERTY_BASE_POS_X));
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("posY"), (float)m_basePropertInfo.posY, _T("positon.y"), MFC_PROPERTY_BASE_POS_Y));
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("posZ"), (float)m_basePropertInfo.posZ, _T("positon.z"), MFC_PROPERTY_BASE_POS_Z));
+	pBase->AddSubItem(pProt);
+	pProt = new CMFCPropertyGridProperty(_T("旋转"), NULL, NULL);
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("rotX"), (float)m_basePropertInfo.rotX, _T("rotation.x"), MFC_PROPERTY_BASE_ROT_X));
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("rotY"), (float)m_basePropertInfo.rotY, _T("rotation.y"), MFC_PROPERTY_BASE_ROT_Y));
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("rotZ"), (float)m_basePropertInfo.rotZ, _T("rotation.z"), MFC_PROPERTY_BASE_ROT_Z));
+	pBase->AddSubItem(pProt);
+	pProt = new CMFCPropertyGridProperty(_T("缩放"), NULL, NULL);
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("scaleX"), (float)m_basePropertInfo.scaleX, _T("scale.x"), MFC_PROPERTY_BASE_SCALE_X));
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("scaleY"), (float)m_basePropertInfo.scaleY, _T("scale.y"), MFC_PROPERTY_BASE_SCALE_Y));
+	pProt->AddSubItem(new CMFCPropertyGridProperty(_T("scaleZ"), (float)m_basePropertInfo.scaleZ, _T("scale.z"), MFC_PROPERTY_BASE_SCALE_Z));
+	pBase->AddSubItem(pProt);
+	m_wndPropList.AddProperty(pBase);
 
-	pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("三维外观"), (_variant_t) false, _T("指定窗口的字体不使用粗体，并且控件将使用三维边框")));
+	//动作
+	CMFCPropertyGridProperty* pModelAnimate = new CMFCPropertyGridProperty(_T("动作"));
+	static const TCHAR szFilter[] = _T("动作文件(*.c3b;*.c3t)|*.c3b|*.c3t|所有文件(*.*)|*.*||");
+	pModelAnimate->AddSubItem(new CMFCPropertyGridFileProperty(_T("动作文件"), TRUE, resourcePathW.c_str(), _T("c3b"), 0, szFilter, _T("指定模型动作"),MFC_PROPERTY_MODEL_ANIMATE_PATH));
+	pModelAnimate->AddSubItem(new CMFCPropertyGridProperty(_T("rate"), (float)m_modelAnimateInfo.rate, _T("rate"), MFC_PROPERTY_MODEL_ANIMATE_RATE));
+	pModelAnimate->AddSubItem(new CMFCPropertyGridProperty(_T("startFrame"), (_variant_t)(int)m_modelAnimateInfo.startframe, _T("开始帧"), MFC_PROPERTY_MODEL_ANIMATE_START_FRAME));
+	pModelAnimate->AddSubItem(new CMFCPropertyGridProperty(_T("endFrame"), (_variant_t)(int)m_modelAnimateInfo.endframe, _T("结束帧"), MFC_PROPERTY_MODEL_ANIMATE_END_FRAME));
+	m_wndPropList.AddProperty(pModelAnimate);
 
-	CMFCPropertyGridProperty* pProp = new CMFCPropertyGridProperty(_T("边框"), _T("对话框外框"), _T("其中之一: “无”、“细”、“可调整大小”或“对话框外框”"));
-	pProp->AddOption(_T("无"));
-	pProp->AddOption(_T("细"));
-	pProp->AddOption(_T("可调整大小"));
-	pProp->AddOption(_T("对话框外框"));
-	pProp->AllowEdit(FALSE);
-
-	pGroup1->AddSubItem(pProp);
-	pGroup1->AddSubItem(new CMFCPropertyGridProperty(_T("标题"), (_variant_t) _T("关于"), _T("指定窗口标题栏中显示的文本")));
-
-	m_wndPropList.AddProperty(pGroup1);
-
-	CMFCPropertyGridProperty* pSize = new CMFCPropertyGridProperty(_T("窗口大小"), 0, TRUE);
-
-	pProp = new CMFCPropertyGridProperty(_T("高度"), (_variant_t) 250l, _T("指定窗口的高度"));
-	pProp->EnableSpinControl(TRUE, 50, 300);
-	pSize->AddSubItem(pProp);
-
-	pProp = new CMFCPropertyGridProperty( _T("宽度"), (_variant_t) 150l, _T("指定窗口的宽度"));
-	pProp->EnableSpinControl(TRUE, 50, 200);
-	pSize->AddSubItem(pProp);
-
-	m_wndPropList.AddProperty(pSize);
-
-	CMFCPropertyGridProperty* pGroup2 = new CMFCPropertyGridProperty(_T("字体"));
-
-	LOGFONT lf;
-	CFont* font = CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT));
-	font->GetLogFont(&lf);
-
-	_tcscpy_s(lf.lfFaceName, _T("宋体, Arial"));
-
-	pGroup2->AddSubItem(new CMFCPropertyGridFontProperty(_T("字体"), lf, CF_EFFECTS | CF_SCREENFONTS, _T("指定窗口的默认字体")));
-	pGroup2->AddSubItem(new CMFCPropertyGridProperty(_T("使用系统字体"), (_variant_t) true, _T("指定窗口使用“MS Shell Dlg”字体")));
-
-	m_wndPropList.AddProperty(pGroup2);
-
-	CMFCPropertyGridProperty* pGroup3 = new CMFCPropertyGridProperty(_T("杂项"));
-	pProp = new CMFCPropertyGridProperty(_T("(名称)"), _T("应用程序"));
-	pProp->Enable(FALSE);
-	pGroup3->AddSubItem(pProp);
-
-	CMFCPropertyGridColorProperty* pColorProp = new CMFCPropertyGridColorProperty(_T("窗口颜色"), RGB(210, 192, 254), NULL, _T("指定默认的窗口颜色"));
-	pColorProp->EnableOtherButton(_T("其他..."));
-	pColorProp->EnableAutomaticButton(_T("默认"), ::GetSysColor(COLOR_3DFACE));
-	pGroup3->AddSubItem(pColorProp);
-
-	static const TCHAR szFilter[] = _T("图标文件(*.ico)|*.ico|所有文件(*.*)|*.*||");
-	pGroup3->AddSubItem(new CMFCPropertyGridFileProperty(_T("图标"), TRUE, _T(""), _T("ico"), 0, szFilter, _T("指定窗口图标")));
-
-	pGroup3->AddSubItem(new CMFCPropertyGridFileProperty(_T("文件夹"), _T("c:\\")));
-
-	m_wndPropList.AddProperty(pGroup3);
-
-	CMFCPropertyGridProperty* pGroup4 = new CMFCPropertyGridProperty(_T("层次结构"));
-
-	CMFCPropertyGridProperty* pGroup41 = new CMFCPropertyGridProperty(_T("第一个子级"));
-	pGroup4->AddSubItem(pGroup41);
-
-	CMFCPropertyGridProperty* pGroup411 = new CMFCPropertyGridProperty(_T("第二个子级"));
-	pGroup41->AddSubItem(pGroup411);
-
-	pGroup411->AddSubItem(new CMFCPropertyGridProperty(_T("项 1"), (_variant_t) _T("值 1"), _T("此为说明")));
-	pGroup411->AddSubItem(new CMFCPropertyGridProperty(_T("项 2"), (_variant_t) _T("值 2"), _T("此为说明")));
-	pGroup411->AddSubItem(new CMFCPropertyGridProperty(_T("项 3"), (_variant_t) _T("值 3"), _T("此为说明")));
-
-	pGroup4->Expand(FALSE);
-	m_wndPropList.AddProperty(pGroup4);
+	//MATERIAL
+	CMFCPropertyGridProperty* pMaterial = new CMFCPropertyGridProperty(_T("材质"));
+	static const TCHAR szFilter2[] = _T("动作文件(*.material)|*.material|所有文件(*.*)|*.*||");
+	pMaterial->AddSubItem(new CMFCPropertyGridFileProperty(_T("材质文件"), TRUE, resourcePathW.c_str(), _T("material"), 0, szFilter2, _T("指定模型材质"), MFC_PROPERTY_MODEL_MATERIAL_PATH));
+	pMaterial->AddSubItem(new CMFCPropertyGridProperty(_T("technique"), (_variant_t)(m_modelMaterialInfo.technique.c_str()), _T("technique"), MFC_PROPERTY_MODEL_MATERIAL_TECHNIQUE));
+	m_wndPropList.AddProperty(pMaterial);
 }
 
 void CPropertiesWnd::OnSetFocus(CWnd* pOldWnd)
@@ -247,6 +208,60 @@ void CPropertiesWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CDockablePane::OnSettingChange(uFlags, lpszSection);
 	SetPropListFont();
+}
+
+LRESULT CPropertiesWnd::OnPropertyChanged(WPARAM wParam, LPARAM lParam)
+{
+	CMFCPropertyGridProperty* pProp = (CMFCPropertyGridProperty*)lParam;
+	int pID = pProp->GetData();
+
+	if (pID >= MFC_PROPERTY_BASE_BEGIN && pID <= MFC_PROPERTY_BASE_END)
+	{
+		if (pID == MFC_PROPERTY_BASE_POS_X) { m_basePropertInfo.posX = pProp->GetValue().fltVal; }
+		else if(pID == MFC_PROPERTY_BASE_POS_Y) { m_basePropertInfo.posY = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_POS_Z) { m_basePropertInfo.posZ = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_ROT_X) { m_basePropertInfo.rotX = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_ROT_Y) { m_basePropertInfo.rotY = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_ROT_Z) { m_basePropertInfo.rotZ = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_SCALE_X) { m_basePropertInfo.scaleX = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_SCALE_Y) { m_basePropertInfo.scaleY = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_BASE_SCALE_Z) { m_basePropertInfo.scaleZ = pProp->GetValue().fltVal; }
+
+		MFCHelper::dispatchCocosCustomEvent(EVENT_MFC_PROPERTY_UPDATE_BASE, (void*)&m_basePropertInfo);
+	}
+	else if (pID >= MFC_PROPERTY_MODEL_ANIMATE_BEGIN && pID <= MFC_PROPERTY_MODEL_ANIMATE_END)
+	{
+		if (pID == MFC_PROPERTY_MODEL_ANIMATE_PATH)
+		{
+			std::wstring tmp(pProp->GetValue().bstrVal);
+			std::string path = MyUtils::w2s(tmp);
+			m_modelAnimateInfo.path = path;
+		}
+		else if (pID == MFC_PROPERTY_MODEL_ANIMATE_RATE) { m_modelAnimateInfo.rate = pProp->GetValue().fltVal; }
+		else if (pID == MFC_PROPERTY_MODEL_ANIMATE_START_FRAME) { m_modelAnimateInfo.startframe = pProp->GetValue().intVal; }
+		else if (pID == MFC_PROPERTY_MODEL_ANIMATE_END_FRAME) { m_modelAnimateInfo.endframe = pProp->GetValue().intVal; }
+
+		MFCHelper::dispatchCocosCustomEvent(EVENT_MFC_PROPERTY_UPDATE_MODEL_ANIMATE, (void*)&m_modelAnimateInfo);
+	}
+	else if (pID >= MFC_PROPERTY_MODEL_MATERIAL_BEGIN && pID <= MFC_PROPERTY_MODEL_MATERIAL_END)
+	{
+		if (pID == MFC_PROPERTY_MODEL_MATERIAL_PATH)
+		{
+			std::wstring tmp(pProp->GetValue().bstrVal);
+			std::string path = MyUtils::w2s(tmp);
+			m_modelMaterialInfo.path = path;
+		}
+		else if (pID == MFC_PROPERTY_MODEL_MATERIAL_TECHNIQUE)
+		{
+			std::wstring tmp(pProp->GetValue().bstrVal);
+			std::string t = MyUtils::w2s(tmp);
+			m_modelMaterialInfo.technique = t;
+		}
+
+		MFCHelper::dispatchCocosCustomEvent(EVENT_MFC_PROPERTY_UPDATE_MODLE_MATERIAL, (void*)&m_modelMaterialInfo);
+	}
+
+	return 0;
 }
 
 void CPropertiesWnd::SetPropListFont()
@@ -268,5 +283,4 @@ void CPropertiesWnd::SetPropListFont()
 	m_fntPropList.CreateFontIndirect(&lf);
 
 	m_wndPropList.SetFont(&m_fntPropList);
-	m_wndObjectCombo.SetFont(&m_fntPropList);
 }

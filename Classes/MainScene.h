@@ -15,6 +15,9 @@ public:
 protected:
 	void addListener();
 	void onMFCFileTreeViewDClickItem(EventCustom* event);
+	void onMFCPropertyBaseChange(EventCustom* event);
+	void onMFCPropertyModelAnimateChange(EventCustom* event);
+	void onMFCPropertyModelMaterialChange(EventCustom* event);
 
 	void clearAllAddItem();
 };

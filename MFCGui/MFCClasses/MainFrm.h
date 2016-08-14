@@ -17,8 +17,9 @@ public:
 // 特性
 public:
 
-// 操作
+// 操作s
 public:
+	void resetProperty();
 
 // 重写
 public:

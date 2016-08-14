@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "GlobalDefines.h"
+
 class CPropertiesToolBar : public CMFCToolBar
 {
 public:
@@ -30,13 +32,16 @@ public:
 
 protected:
 	CFont m_fntPropList;
-	CComboBox m_wndObjectCombo;
-	CPropertiesToolBar m_wndToolBar;
 	CMFCPropertyGridCtrl m_wndPropList;
+
+	BasePropert m_basePropertInfo;
+	ModelAnimate m_modelAnimateInfo;
+	ModelMaterial m_modelMaterialInfo;
 
 // й╣ож
 public:
 	virtual ~CPropertiesWnd();
+	void reset();
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -52,6 +57,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 
+	afx_msg LRESULT OnPropertyChanged(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 	void InitPropList();
