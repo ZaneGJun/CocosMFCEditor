@@ -1,7 +1,11 @@
 #include "MainScene.h"
 #include "GlobalDefines.h"
 #include "MyUtils.h"
+#include "cocostudio/ActionTimeline/CSLoader.h"
+
 USING_NS_CC;
+
+std::vector<std::string> _addChileNodeTypeList;
 
 Scene* MainScene::createScene()
 {
@@ -49,53 +53,25 @@ bool MainScene::init()
 
 	addListener();
 
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
-
-    // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
-                                           CC_CALLBACK_1(MainScene::menuCloseCallback, this));
-    
-    closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
-                                origin.y + closeItem->getContentSize().height/2));
-
-    // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
-    menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
-
 	auto pngAddNode = CCNode::create();
 	pngAddNode->setPosition(visibleSize.width/2, visibleSize.height/2);
 	pngAddNode->setName("PngAddNode");
 	this->addChild(pngAddNode);
+	_addChileNodeTypeList.push_back("PngAddNode");
 
 	auto modelAddNode = CCNode::create();
 	modelAddNode->setPosition(visibleSize.width / 2, visibleSize.height / 2);
 	modelAddNode->setName("ModelAddNode");
 	this->addChild(modelAddNode);
+	_addChileNodeTypeList.push_back("ModelAddNode");
+
+	auto csbAddNode = CCNode::create();
+	csbAddNode->setPosition(0, 0);
+	csbAddNode->setName("CsbAddNode");
+	this->addChild(csbAddNode);
+	_addChileNodeTypeList.push_back("CsbAddNode");
     
     return true;
-}
-
-
-void MainScene::menuCloseCallback(Ref* pSender)
-{
-    //Close the cocos2d-x game scene and quit the application
-    Director::getInstance()->end();
-
-    #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    exit(0);
-#endif
-    
-    /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
-    
-    //EventCustom customEndEvent("game_scene_close_event");
-    //_eventDispatcher->dispatchEvent(&customEndEvent);
-    
-    
 }
 
 void MainScene::addListener()
@@ -144,19 +120,26 @@ void MainScene::onMFCFileTreeViewDClickItem(EventCustom* event)
 			addNode->addChild(model);
 		}
 	}
+	else if (fileExtension == ".csb")
+	{
+		auto addNode = getChildByName("CsbAddNode");
+		if (addNode)
+		{
+			auto model = CSLoader::getInstance()->createNode(filename);
+			model->setAnchorPoint(Vec2(0.0f, 0.0f));
+			addNode->addChild(model);
+		}
+	}
 }
 
 void MainScene::clearAllAddItem()
 {
-	auto pngAddNode = getChildByName("PngAddNode");
-	if (pngAddNode)
+	for (std::string name : _addChileNodeTypeList)
 	{
-		pngAddNode->removeAllChildrenWithCleanup(true);
-	};
-
-	auto modelAddNode = getChildByName("ModelAddNode");
-	if (modelAddNode)
-	{
-		modelAddNode->removeAllChildrenWithCleanup(true);
-	};
+		auto addNode = getChildByName(name);
+		if (addNode)
+		{
+			addNode->removeAllChildrenWithCleanup(true);
+		};
+	}
 }

@@ -11,11 +11,6 @@ public:
 	static MainScene* create();
 
     virtual bool init();
-    
-    // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
-    
-    // implement the "static create()" method manually
 
 protected:
 	void addListener();
