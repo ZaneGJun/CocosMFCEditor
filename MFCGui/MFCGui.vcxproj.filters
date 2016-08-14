@@ -76,6 +76,7 @@
     <ClInclude Include="..\Classes\MainScene.h">
       <Filter>Classes</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCClasses\ChildFrm.cpp">

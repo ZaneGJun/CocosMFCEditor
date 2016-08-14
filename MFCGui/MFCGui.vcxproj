@@ -213,6 +213,7 @@
     <ClInclude Include="MFCClasses\stdafx.h" />
     <ClInclude Include="MFCClasses\targetver.h" />
     <ClInclude Include="MFCClasses\ViewTree.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\MainScene.cpp" />
