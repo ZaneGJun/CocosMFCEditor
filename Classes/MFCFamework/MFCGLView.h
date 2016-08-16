@@ -47,6 +47,9 @@ protected:
 
 	bool initGlew();
 
+	void initNormalOpenGL(Rect rect);
+	void initWithOpenGlSmaple(Rect rect, int sample);
+
 	std::string _glfwError;
 	float _frameZoomFactor;
 	HDC  m_hDC;

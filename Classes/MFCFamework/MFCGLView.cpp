@@ -1,5 +1,7 @@
 #include "MFCGLView.h"
 
+#include "win32-specific/gles/include/OGLES/GL/wglew.h"
+
 NS_CC_BEGIN
 //////////////////////////////////////////////////////
 
@@ -190,12 +192,8 @@ bool MFCGLView::initWithRect(const std::string & viewName, Rect rect, HWND handl
 	m_hWnd = handle;
 	setViewName(viewName);
 
-	//gl  ContextCurrent
-	m_hDC = GetDC(m_hWnd);
-	SetupPixelFormat(m_hDC);
-	m_hRC = wglCreateContext(m_hDC);
-	wglMakeCurrent(m_hDC, m_hRC);
-	setFrameSize(rect.size.width, rect.size.height);
+	initNormalOpenGL(rect);
+	//initWithOpenGlSmaple(rect, 2);
 
 	// check OpenGL version at first
 	const GLubyte* glVersion = glGetString(GL_VERSION);
@@ -218,6 +216,141 @@ bool MFCGLView::initWithRect(const std::string & viewName, Rect rect, HWND handl
 	return true;
 	return false;
 }
+
+void cocos2d::MFCGLView::initNormalOpenGL(Rect rect)
+{
+	//gl  ContextCurrent
+	m_hDC = GetDC(m_hWnd);
+	SetupPixelFormat(m_hDC);
+	m_hRC = wglCreateContext(m_hDC);
+	wglMakeCurrent(m_hDC, m_hRC);
+	setFrameSize(rect.size.width, rect.size.height);
+}
+
+void cocos2d::MFCGLView::initWithOpenGlSmaple(Rect rect, int sample)
+{
+	//----------创建一个临时窗体
+	HWND secondwnd;
+	WNDCLASS wc; //窗体类结构体  
+	wc.style = CS_HREDRAW | CS_VREDRAW; //窗体风格   
+	wc.lpfnWndProc = NULL; //窗体处理函数  
+	wc.cbClsExtra = 0; //窗体类是否由扩展  
+	wc.cbWndExtra = 0; //窗体实例是否由扩展  
+	wc.hInstance = NULL; //窗体句柄  
+	wc.hIcon = LoadIcon(0, IDI_APPLICATION); //窗体图标  
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW); //窗体鼠标样式  
+	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); //窗体背景颜色  
+	wc.lpszMenuName = NULL; //窗体菜单  
+	wc.lpszClassName = L"Test"; //窗体类名  
+	if (!RegisterClass(&wc)) //判断窗体是否注册成功  
+	{
+		//MessageBox(L"注册失败");
+		return;
+	}
+	//创建窗体  
+	secondwnd = CreateWindow(L"Test", //窗体类名  
+		L"TTTmp",  //窗体标题名  
+		WS_OVERLAPPEDWINDOW,  //窗体风格  
+		CW_USEDEFAULT,
+		CW_USEDEFAULT, //窗体坐标  
+		CW_USEDEFAULT,
+		CW_USEDEFAULT, //窗体坐标  
+		NULL, //窗体的父窗体  
+		NULL, //窗体的子菜单  
+		NULL,  //窗体句柄  
+		NULL); // 如果函数成功，返回值为新窗口的句柄：如果函数失败，返回值为NULL  
+	if (secondwnd == 0)//判断创建窗体是否成功  
+	{
+		//MessageBox(L"创建窗体失败");
+		return;
+	}
+	::ShowWindow(secondwnd, SW_HIDE); //显示窗体  
+	::UpdateWindow(secondwnd); //绘制窗体；  
+
+	PIXELFORMATDESCRIPTOR pfd = //定义像素格式
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),  // size
+		1,                          // version
+		PFD_SUPPORT_OPENGL |        // OpenGL window
+		PFD_DRAW_TO_WINDOW |        // render to window
+		PFD_DOUBLEBUFFER,           // support double-buffering
+		PFD_TYPE_RGBA,              // color type
+		32,                         // preferred color depth
+		0, 0, 0, 0, 0, 0,           // color bits (ignored)
+		0,                          // no alpha buffer
+		0,                          // alpha bits (ignored)
+		0,                          // no accumulation buffer
+		0, 0, 0, 0,                 // accum bits (ignored)
+		24,                         // depth buffer
+		8,                          // no stencil buffer
+		0,                          // no auxiliary buffers
+		PFD_MAIN_PLANE,             // main layer
+		0,                          // reserved
+		0, 0, 0,                    // no layer, visible, damage masks
+	};
+	//----------用这个临时窗体得到一个可用HGLRC
+	HDC secondDC = ::GetDC(secondwnd);
+	int nIndex = ChoosePixelFormat(secondDC, &pfd); //选择刚刚定义的像素格式
+	if (nIndex == 0)
+	{
+		return;
+	}
+
+	SetPixelFormat(secondDC, nIndex, &pfd);   //设置像素格式
+
+	m_hRC = wglCreateContext(secondDC);
+	wglMakeCurrent(secondDC, m_hRC);
+	//----------然后初始化GLEW
+	GLenum glerr = glewInit();
+	if (glerr != GLEW_OK)
+	{
+		//MessageBox(L"无法初始化GLEW！");
+	}
+	else
+	{
+		OutputDebugString(L"成功加载GLEW\n");
+	}
+
+	UINT Multisample = sample; //4倍多重采样率
+	int pixelformat;
+	UINT numformat;
+	float   fAttributes[] = { 0, 0 };
+	int iAtributes[] =
+	{
+		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+		WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+		WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+		WGL_COLOR_BITS_ARB, 24,
+		WGL_ALPHA_BITS_ARB, 8,
+		WGL_DEPTH_BITS_ARB, 32,
+		WGL_STENCIL_BITS_ARB, 8,
+		WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+		WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+		WGL_SAMPLES_ARB, Multisample,
+		0, 0
+	};
+	//----------取得可用的多重采样像素格式
+	if (!wglChoosePixelFormatARB(secondDC, iAtributes, fAttributes, 1, &pixelformat, &numformat))
+	{
+		//MessageBox(L"找不到可用的抗锯齿格式");
+	}
+
+	//----------删除由临时窗体得到的HGLRC，同时销毁临时窗体
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(m_hRC);
+
+	::ReleaseDC(secondwnd, secondDC);
+	::DestroyWindow(secondwnd);
+
+	m_hDC = GetDC(m_hWnd);
+	//----------用得到的多重采样像素格式，设置渲染窗体
+	SetPixelFormat(m_hDC, pixelformat, &pfd);   //设置像素格式
+
+	m_hRC = wglCreateContext(m_hDC);
+	wglMakeCurrent(m_hDC, m_hRC);
+	setFrameSize(rect.size.width, rect.size.height);
+}
+
 
 void MFCGLView::onGLFWError(int errorID, const char * errorDesc)
 {
