@@ -192,8 +192,8 @@ bool MFCGLView::initWithRect(const std::string & viewName, Rect rect, HWND handl
 	m_hWnd = handle;
 	setViewName(viewName);
 
-	initNormalOpenGL(rect);
-	//initWithOpenGlSmaple(rect, 2);
+	//initNormalOpenGL(rect);
+	initWithOpenGlSmaple(rect, 16);
 
 	// check OpenGL version at first
 	const GLubyte* glVersion = glGetString(GL_VERSION);
@@ -233,11 +233,11 @@ void cocos2d::MFCGLView::initWithOpenGlSmaple(Rect rect, int sample)
 	HWND secondwnd;
 	WNDCLASS wc; //窗体类结构体  
 	wc.style = CS_HREDRAW | CS_VREDRAW; //窗体风格   
-	wc.lpfnWndProc = NULL; //窗体处理函数  
+	wc.lpfnWndProc = DefWindowProc; //窗体处理函数  
 	wc.cbClsExtra = 0; //窗体类是否由扩展  
 	wc.cbWndExtra = 0; //窗体实例是否由扩展  
-	wc.hInstance = NULL; //窗体句柄  
-	wc.hIcon = LoadIcon(0, IDI_APPLICATION); //窗体图标  
+	wc.hInstance = 0; //窗体句柄  
+	wc.hIcon = 0; //窗体图标  
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW); //窗体鼠标样式  
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); //窗体背景颜色  
 	wc.lpszMenuName = NULL; //窗体菜单  
@@ -298,8 +298,8 @@ void cocos2d::MFCGLView::initWithOpenGlSmaple(Rect rect, int sample)
 
 	SetPixelFormat(secondDC, nIndex, &pfd);   //设置像素格式
 
-	m_hRC = wglCreateContext(secondDC);
-	wglMakeCurrent(secondDC, m_hRC);
+	auto rc = wglCreateContext(secondDC);
+	wglMakeCurrent(secondDC, rc);
 	//----------然后初始化GLEW
 	GLenum glerr = glewInit();
 	if (glerr != GLEW_OK)
@@ -322,8 +322,8 @@ void cocos2d::MFCGLView::initWithOpenGlSmaple(Rect rect, int sample)
 		WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
 		WGL_COLOR_BITS_ARB, 24,
 		WGL_ALPHA_BITS_ARB, 8,
-		WGL_DEPTH_BITS_ARB, 32,
-		WGL_STENCIL_BITS_ARB, 8,
+		WGL_DEPTH_BITS_ARB, 16,
+		WGL_STENCIL_BITS_ARB, 0,
 		WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 		WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 		WGL_SAMPLES_ARB, Multisample,
@@ -337,7 +337,7 @@ void cocos2d::MFCGLView::initWithOpenGlSmaple(Rect rect, int sample)
 
 	//----------删除由临时窗体得到的HGLRC，同时销毁临时窗体
 	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(m_hRC);
+	wglDeleteContext(rc);
 
 	::ReleaseDC(secondwnd, secondDC);
 	::DestroyWindow(secondwnd);
